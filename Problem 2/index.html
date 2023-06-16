@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Video Capture, Encode Every 3 Seconds, and Upload</title>
+  </head>
+  <body>
+    <h1>Video Recorder</h1>
+    <video id="video" width="640" height="480" autoplay controls></video>
+    <br />
+    <br />
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+    <script>
+      var stream, video, mediaRecorder = null,
+        chunks = [],
+        appending = false;
+      var options = {
+        audio: true,
+        video: {
+          width: 640,
+          height: 480
+        },
+        mimeType: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"'
+      };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = 'video/webm; codecs="vp8, opus"';
+      }
+      var startBtn = document.getElementById('startBtn');
+      var stopBtn = document.getElementById('stopBtn');
+      //var mergeBtn = document.getElementById('mergeBtn');
+      startBtn.addEventListener('click', function() {
+        navigator.mediaDevices.getUserMedia(options).then(function(mediaStream) {
+          // Set up the video element to display the video stream
+          video = document.getElementById('video');
+          video.srcObject = mediaStream;
+          stream = mediaStream;
+          // Set up the MediaRecorder to record the video and audio streams
+          mediaRecorder = new MediaRecorder(mediaStream, options);
+          chunks = [];
+          mediaRecorder.ondataavailable = function(event) {
+            chunks.push(event.data);
+          };
+          // Start the MediaRecorder to begin recording the video and audio streams
+          mediaRecorder.start();
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+        }).catch(function(error) {
+          console.error('Error accessing camera: ' + error);
+        });
+      });
+      stopBtn.addEventListener('click', function() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+          if (stream) {
+            stream.getTracks().forEach(function(track) {
+              track.stop();
+            });
+          }
+          mediaRecorder = null;
+          video.srcObject = null;
+          video.pause();
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          // Convert the video chunks to a single Blob object and upload to server
+          var blob = new Blob(chunks, {
+            type: 'video/webm'
+          });
+          uploadVideo(blob);
+          chunks = [];
+        }
+      });
+      async function uploadVideo(blob, retries = 3, delay = 1000) {
+        // Upload the video chunks to the server
+        const formData = new FormData();
+        formData.append('video', blob);
+        const url = 'http://localhost:8888/upload.php';
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+          });
+          // Check if the response is successful
+          if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+          }
+          // Print the response from the server
+          const result = await response.text();
+          console.log(result);
+        } catch (error) {
+          console.error('Error uploading video:', error);
+          // Retry uploading if there are remaining retries
+          if (retries > 0) {
+            console.log(`Retrying upload (${retries - 1} retries left)...`);
+            setTimeout(() => {
+              uploadVideo(blob, retries - 1, delay);
+            }, delay);
+          } else {
+            console.error('Video upload failed after multiple attempts');
+          }
+        }
+      }
+      // Set the timer to upload the video chunks after every 3 seconds
+      setInterval(function() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+          mediaRecorder.start();
+          console.log('Blob size:', chunks);
+          // Convert the video chunks to a Blob and upload to server
+          var blob = new Blob(chunks, {
+            type: 'video/webm'
+          });
+          uploadVideo(blob);
+          // Reset the chunks array
+          chunks = [];
+        }
+      }, 3000);
+    </script>
+  </body>
+</html>
