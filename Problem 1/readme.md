@@ -41,4 +41,4 @@ Open Wireshark on the machine running the browser.
 
 Using the same MPD URL as in Task 1, try retrieving the MPD file again on your browser and observe the capture log being updated on Wireshark.
 Save Wireshark’s capture log for this HTTP request and response in the default pcapng file format. Use Wireshark capture filters 2 to capture and save only the relevant packets.
-Save your file as dash-wireshark-≪Student number≫.pcapng.
+Save your file as dash-wireshark.pcapng.
