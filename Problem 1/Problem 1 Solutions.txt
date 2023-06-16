@@ -1,0 +1,18 @@
+
+TASK 1: 
+ 
+1. The playlist provides 3 different video quality levels, as indicated by the 3 different <Representation> elements in the file. 
+
+2. The highest quality level is 1280x720 resolution with a bitrate of 1627745 kbps, as indicated by the <Representation id="1"> element. The lowest quality level is 640x350 resolution with a bitrate of 542383 kbps, as indicated by the <Representation id="3"> element. 
+
+3. Different video quality levels are necessary to accommodate the diverse network conditions and device capabilities of users. For instance, users with slow or inconsistent internet connections may encounter buffering or interruptions if the video is retrieved at a high-quality level. To avoid this, the player can dynamically adjust to a lower quality level to ensure uninterrupted playback. Conversely, users with fast and stable internet connections and high-resolution devices may experience a subpar viewing experience with pixelated or blurry video if the video is retrieved at a low-quality level. Therefore, providing multiple quality levels allows the player to provide the best possible viewing experience to each user based on their network and device conditions. 
+ 
+TASK 2: 
+ 
+1. https://nustreaming.github.io/streaming/segment_bbb_72011.m4s 
+
+2. File is m4s type. 
+
+3. 43s
+ 
+4. One advantage of using longer video segments (e.g., 10 seconds per segment) is that it can reduce the overhead of HTTP requests and responses. With longer video segments, there are fewer HTTP transactions required to retrieve the same amount of video content, which can lead to improved network efficiency and reduced server load.  However, a disadvantage of using longer video segments is that it can increase the potential for buffering or interruptions during playback. Since the player needs to wait for the entire segment to be retrieved before it can start playback, any delay or interruption during the retrieval process can cause playback to pause or stutter. 
